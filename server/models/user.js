@@ -32,16 +32,17 @@ const UserSchema = new mongoose.Schema({
     }]    
 });
 
-// custom method to limit what is sent back on user object
-UserSchema.methods.toJSON = function() {
+// overriding mongoose toJSON to return only "_id", "email"  
+UserSchema.methods.toJSON = function () {
     const user = this;
     const userObject = user.toObject();
     
     return _.pick(userObject, ["_id", "email"]);
-}
+};
 
+// custom instance method
 // custom method to generate token with jwt
-UserSchema.methods.generateAuthToken = function() {
+UserSchema.methods.generateAuthToken = function () {
     const user = this;
     const access = "auth";
     const token =  jwt.sign({ _id: user._id.toHexString(), access}, "abc123").toString();
@@ -53,6 +54,29 @@ UserSchema.methods.generateAuthToken = function() {
     return user.save().then(() => {
         return token;
     });
+};
+
+// custom model method
+UserSchema.statics.findByToken = function (token) {
+    // "this" is User instead of user
+    const User = this;
+    let  decoded;
+
+    try {
+        decoded = jwt.verify(token, "abc123");
+    } catch(error) {
+        // return new Promise((resolve, reject) => {
+        //     reject() 
+        // });
+        return Promise.reject();
+    }
+
+    return User.findOne({
+        _id: decoded._id,
+        "tokens.token": token,
+        "tokens.access": "auth"
+    });
+
 };
 
 const User = mongoose.model("User", UserSchema);
