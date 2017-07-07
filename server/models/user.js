@@ -82,7 +82,7 @@ UserSchema.statics.findByToken = function (token) {
 
 
 
-// salt and hash password before save to database using bcrypt
+// salt and hash password before save to database using bcryptjs
 UserSchema.pre("save", function (next) {
     const user = this;
 
