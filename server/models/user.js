@@ -57,6 +57,18 @@ UserSchema.methods.generateAuthToken = function () {
     });
 };
 
+UserSchema.methods.removeToken = function (token) {
+    const user = this;
+    return user.update({
+        $pull: {
+            tokens: {
+                token
+            }
+        }
+    });
+    
+};
+
 // custom model method
 UserSchema.statics.findByToken = function (token) {
     // "this" is User instead of user
@@ -102,6 +114,8 @@ UserSchema.statics.findByCredentials = function(email, password) {
         });
     });
 };
+
+
 
 
 // salt and hash password before save to database using bcryptjs
