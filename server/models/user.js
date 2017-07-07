@@ -81,6 +81,28 @@ UserSchema.statics.findByToken = function (token) {
 };
 
 
+UserSchema.statics.findByCredentials = function(email, password) {
+    const User = this;
+
+    return User.findOne({email}).then((user) => {
+        if (!user) {
+            return Promise.reject();
+        }
+
+        return new Promise((resolve, reject) => {
+            // Use bcrypt.compare to compare password and user.password
+            bcrypt.compare(password, user.password, (err, res) => {
+                if (res) {
+                    resolve(user);
+                }
+                else {
+                    reject(); 
+                }                                
+            });
+        });
+    });
+};
+
 
 // salt and hash password before save to database using bcryptjs
 UserSchema.pre("save", function (next) {
